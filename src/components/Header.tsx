@@ -25,6 +25,7 @@ interface HeaderProps {
   onOpenPomodoro: () => void;
   onOpenAiReport: () => void;
   onOpenNewTask: () => void;
+  onOpenCommandPalette: () => void;
   onToggleMobileMenu: () => void;
 }
 
@@ -38,6 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenPomodoro,
   onOpenAiReport,
   onOpenNewTask,
+  onOpenCommandPalette,
   onToggleMobileMenu,
 }) => {
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -97,24 +99,33 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Middle: Live search bar */}
+      {/* Middle: Live search bar with Command Palette shortcut */}
       <div className="flex-1 max-w-md mx-2 hidden sm:block">
-        <div className="relative">
+        <div className="relative flex items-center">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
           <input
             ref={searchInputRef}
             type="text"
-            placeholder="Search tasks (Press '/' to focus)..."
+            placeholder="Search tasks or press ⌘K for command palette..."
             value={filterState.search}
             onChange={(e) => setFilterState((prev) => ({ ...prev, search: e.target.value }))}
-            className="w-full text-xs pl-9 pr-8 py-2 bg-neutral-100 dark:bg-neutral-800 border-none rounded-lg text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-hidden focus:ring-1 focus:ring-neutral-400 dark:focus:ring-neutral-600 transition-all"
+            className="w-full text-xs pl-9 pr-14 py-2 bg-neutral-100 dark:bg-neutral-800 border-none rounded-xl text-neutral-900 dark:text-white placeholder-neutral-400 focus:outline-hidden focus:ring-1 focus:ring-neutral-400 dark:focus:ring-neutral-600 transition-all font-medium"
           />
-          {filterState.search && (
+          {filterState.search ? (
             <button
               onClick={() => setFilterState((prev) => ({ ...prev, search: '' }))}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
             >
               <X className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={onOpenCommandPalette}
+              title="Open Command Palette (Cmd/Ctrl + K)"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-mono px-1.5 py-0.5 bg-neutral-200 dark:bg-neutral-700 text-neutral-500 dark:text-neutral-300 rounded hover:bg-neutral-300 dark:hover:bg-neutral-600 transition-colors"
+            >
+              ⌘K
             </button>
           )}
         </div>

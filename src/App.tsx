@@ -11,6 +11,8 @@ import { PomodoroModal } from './components/PomodoroModal';
 import { AnalyticsModal } from './components/AnalyticsModal';
 import { ExportImportModal } from './components/ExportImportModal';
 import { AiReportModal } from './components/AiReportModal';
+import { DailyStatsStrip } from './components/DailyStatsStrip';
+import { CommandPalette } from './components/CommandPalette';
 import {
   Task,
   Project,
@@ -121,6 +123,7 @@ export default function App() {
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
   const [isExportImportModalOpen, setIsExportImportModalOpen] = useState(false);
   const [isAiReportModalOpen, setIsAiReportModalOpen] = useState(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
   // Pomodoro Session State
   const [pomodoro, setPomodoro] = useState<PomodoroSession>({
@@ -188,6 +191,13 @@ export default function App() {
   // Global Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + K for Command Palette
+      if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+        return;
+      }
+
       const activeEl = document.activeElement;
       const isInput =
         activeEl?.tagName === 'INPUT' ||
@@ -536,6 +546,15 @@ export default function App() {
     }
   }, []);
 
+  const handleAddTaskFromAi = useCallback((title: string) => {
+    handleQuickAddTask({
+      title,
+      dueDate: getTodayString(),
+      priority: 'high',
+      projectId: projects[0]?.id || 'proj-1',
+    });
+  }, [handleQuickAddTask, projects]);
+
   return (
     <div className="flex h-screen w-full overflow-hidden bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 font-sans">
       {/* Sidebar Navigation */}
@@ -570,12 +589,22 @@ export default function App() {
           onOpenPomodoro={() => setIsPomodoroModalOpen(true)}
           onOpenAiReport={() => setIsAiReportModalOpen(true)}
           onOpenNewTask={() => openNewTask()}
+          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
           onToggleMobileMenu={() => setIsMobileSidebarOpen(true)}
         />
 
         {/* Scrollable Viewport Body */}
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 space-y-6">
           <div className="max-w-6xl mx-auto space-y-6">
+            {/* Daily Velocity & Overview Strip */}
+            <DailyStatsStrip
+              tasks={tasks}
+              onOpenAiReport={() => setIsAiReportModalOpen(true)}
+              onOpenPomodoro={() => setIsPomodoroModalOpen(true)}
+              onFilterOverdue={() => setFilterState((prev) => ({ ...prev, view: 'today' }))}
+              onFilterToday={() => setFilterState((prev) => ({ ...prev, view: 'today' }))}
+            />
+
             {/* Quick Add Bar for Fast Entry */}
             {filterState.view !== 'completed' && (
               <QuickAddBar
@@ -688,6 +717,7 @@ export default function App() {
         tasks={tasks}
         projects={projects}
         history={history}
+        onAddTaskFromAi={handleAddTaskFromAi}
       />
 
       {/* Export & Import Modal */}
@@ -698,6 +728,24 @@ export default function App() {
         projects={projects}
         onImportData={handleImportData}
         onResetData={handleResetData}
+      />
+
+      {/* Interactive Command Palette (Cmd + K) */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        tasks={tasks}
+        onSelectTask={(task) => {
+          setTaskToEdit(task);
+          setIsTaskModalOpen(true);
+        }}
+        onOpenNewTask={() => openNewTask()}
+        onOpenPomodoro={() => setIsPomodoroModalOpen(true)}
+        onOpenAiReport={() => setIsAiReportModalOpen(true)}
+        onOpenExportImport={() => setIsExportImportModalOpen(true)}
+        onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
+        isDarkMode={isDarkMode}
+        setViewMode={setViewMode}
       />
     </div>
   );
