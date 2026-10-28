@@ -1,0 +1,6 @@
+{
+  "name": "TaskFlow - Modern Task & Project Planner",
+  "description": "A full-featured to-do list and task management website with multiple views (List, Kanban, Calendar, Matrix), priority matrix, Pomodoro focus timer, subtasks, tags, project workspaces, and export tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
